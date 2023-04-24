@@ -1,51 +1,35 @@
-import { env } from 'process';
+const { MongoClient } = require("mongodb");
 
-const { MongoClient } = require('mongodb');
-
-const DB_HOST = env.DB_HOST || 'localhost';
-const DB_PORT = env.DB_PORT || 27017;
-const DB_DATABASE = env.DB_DATABASE || 'files_manager';
-const url = `mongodb://${DB_HOST}:${DB_PORT}`;
+const host = process.env.MONGO_HOST || "localhost";
+const port = process.env.MONGO_PORT || 27017;
+const dbName = process.env.MONGO_DB || "files_manager";
+const url = `mongodb://${host}:${port}`;
 
 class DBClient {
   constructor() {
-    this.mongoClient = new MongoClient(
-      url,
-      {
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
-      },
-    );
-
-    const promise = new Promise((resolve, reject) => {
-      this.mongoClient.connect((err) => { reject(err); });
-      resolve(this.mongoClient.db(DB_DATABASE));
+    MongoClient.connect(url, { useUnifiedTopology: true }, (err, client) => {
+      if (err) {
+        console.log(err);
+      } else {
+        this.db = client.db(dbName);
+        this.users = this.db.collection("users");
+        this.files = this.db.collection("files");
+      }
     });
-    this.connection = promise;
   }
 
   isAlive() {
-    return this.mongoClient.isConnected();
+    return !!this.db;
   }
 
   async nbUsers() {
-    return this.connection
-      .then((database) => {
-        const collection = database.collection('users');
-        return collection.countDocuments();
-      })
-      .catch();
+    return this.users.countDocuments();
   }
 
   async nbFiles() {
-    return this.connection
-      .then((database) => {
-        const collection = database.collection('files');
-        return collection.countDocuments();
-      })
-      .catch();
+    return this.files.countDocuments();
   }
 }
 
 const dbClient = new DBClient();
-export default dbClient;
+module.exports = dbClient;
