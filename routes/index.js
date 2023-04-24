@@ -1,21 +1,22 @@
-import express from "express";
-import AppController from "../controllers/AppController.js";
-import UsersController from "../controllers/UsersController.js";
-import AuthController from "../controllers/AuthController.js";
-import bodyParser from "body-parser";
-const parser = bodyParser.json();
+const express = require("express");
+const AppController = require("../controllers/AppController");
+const UsersController = require("../controllers/UsersController");
+const AuthController = require("../controllers/AuthController");
+const FilesController = require("../controllers/FilesController");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.get("/status", AppController.getStatus);
 router.get("/stats", AppController.getStats);
-router.post("/users", parser, (req, res) => UsersController.postNew(req, res));
-router.get("/users/me", parser, (req, res) => UsersController.getOne(req, res));
-router.get("/connect", parser, (req, res) =>
-  AuthController.getConnect(req, res)
-);
-router.get("/disconnect", parser, (req, res) =>
-  AuthController.getDisconnect(req, res)
-);
+router.post("/users", UsersController.postNew);
+router.get("/users/me", UsersController.getMe);
+router.get("/connect", AuthController.getConnect);
+router.get("/disconnect", AuthController.getDisconnect);
+router.post("/files", FilesController.postUpload);
+// router.get('/files/:id', FilesController.getShow);
+// router.get('/files', FilesController.getIndex);
+// router.put('/files/:id/publish', FilesController.putPublish);
+// router.put('/files/:id/unpublish', FilesController.putUnpublish);
+// router.get('/files/:id/data', FilesController.getFile);
 
-export default router;
+module.exports = router;
