@@ -3,17 +3,20 @@ const mongodb = require('mongodb');
 const Redis = require('../utils/redis');
 const Mongo = require('../utils/db');
 
-class UsersContoller {
+class UsersController {
   static async postNew(request, response) {
     const { email, password } = request.body;
+
     if (!email) {
-      response.status(400).json({ error: 'Missing email' });
+      return response.status(400).json({ error: 'Missing email' });
     }
+
     if (!password) {
-      response.status(400).json({ error: 'Missing password' });
+      return response.status(400).json({ error: 'Missing password' });
     }
-    if (await Mongo.users.findOne({ email })) {
-      return response.status(400).json({ error: 'Already exist' });
+    const existingUser = await Mongo.users.findOne({ email });
+    if (existingUser) {
+      return response.status(400).json({ error: 'User already exists' });
     }
     const newUser = await Mongo.users.insertOne({
       email,
@@ -24,6 +27,9 @@ class UsersContoller {
 
   static async getMe(request, response) {
     const token = request.header('X-Token');
+    if (!token) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
     const authToken = `auth_${token}`;
     const curUserToken = await Redis.get(authToken);
     if (!curUserToken) {
@@ -32,8 +38,11 @@ class UsersContoller {
     const curUser = await Mongo.users.findOne({
       _id: new mongodb.ObjectId(curUserToken),
     });
+    if (!curUser) {
+      return response.status(401).json({ error: 'Unauthorized' });
+    }
     return response.status(200).json({ id: curUser._id, email: curUser.email });
   }
 }
 
-module.exports = UsersContoller;
+module.exports = UsersController;
