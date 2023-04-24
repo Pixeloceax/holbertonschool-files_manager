@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 
 const routes = require('./routes/index');
 
@@ -11,4 +11,4 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-export default app;
+module.exports = app;

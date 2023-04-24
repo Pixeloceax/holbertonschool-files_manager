@@ -1,8 +1,8 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient } = require('mongodb');
 
-const host = process.env.MONGO_HOST || "localhost";
+const host = process.env.MONGO_HOST || 'localhost';
 const port = process.env.MONGO_PORT || 27017;
-const dbName = process.env.MONGO_DB || "files_manager";
+const dbName = process.env.MONGO_DB || 'files_manager';
 const url = `mongodb://${host}:${port}`;
 
 class DBClient {
@@ -12,8 +12,8 @@ class DBClient {
         console.log(err);
       } else {
         this.db = client.db(dbName);
-        this.users = this.db.collection("users");
-        this.files = this.db.collection("files");
+        this.users = this.db.collection('users');
+        this.files = this.db.collection('files');
       }
     });
   }
