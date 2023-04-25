@@ -3,7 +3,7 @@ const mongodb = require('mongodb');
 const Redis = require('../utils/redis');
 const Mongo = require('../utils/db');
 
-class UsersContoller {
+class UsersController {
   static async postNew(request, response) {
     const { email, password } = request.body;
     if (!email) {
@@ -12,8 +12,9 @@ class UsersContoller {
     if (!password) {
       return response.status(400).json({ error: 'Missing password' });
     }
-    if (await Mongo.users.findOne({ email })) {
-      return response.status(400).json({ error: 'Already exists' });
+    const existingUser = await Mongo.users.findOne({ email });
+    if (existingUser) {
+      return response.status(409).json({ error: 'Already exist' });
     }
 
     const newUser = await Mongo.users.insertOne({
@@ -38,4 +39,4 @@ class UsersContoller {
   }
 }
 
-module.exports = UsersContoller;
+module.exports = UsersController;
